@@ -89,7 +89,6 @@ class To_Disk(QuickScope):
 				self.buffer[fn] = 0.0
 
 			if msg:
-
 				# if step axis is choseen
 				if self.ea:
 					self.ea += 1
@@ -104,9 +103,12 @@ class To_Disk(QuickScope):
 					if hasattr(self, 'peek'):
 						t = Decimal(str(float(msg.time)))
 					else:
-						t = Decimal(str(float(msg.time[0])))
-
-				val = msg.value[self.col]
+						t = Decimal(str(float(msg[-1][0])))
+				
+				### adapted with PyPDEVS
+				
+				val = msg.value[self.col] if hasattr(self, 'peek') else msg[0][self.col]
+				
 				if isinstance(val, int) or isinstance(val, float):
 					v = Decimal(str(float(val)))
 				else:
@@ -143,7 +145,8 @@ class To_Disk(QuickScope):
 		n = len(self.IPorts)
 		for np in xrange(n):
 			fn = "%s%d%s"%(self.fileName, np, self.ext)
-			with open(fn, 'a') as f:
-				f.write("%s%s%s\n"%(self.last_time_value[fn],self.comma,self.buffer[fn]))
+			if (fn in self.last_time_value) and (fn in self.buffer):
+				with open(fn, 'a') as f:
+					f.write("%s%s%s\n"%(self.last_time_value[fn],self.comma,self.buffer[fn]))
 	###
 	def __str__(self):return "To_Disk"
